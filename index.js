@@ -1,8 +1,10 @@
 const express = require('express')
 const app = express()
 const { MongoClient } = require('mongodb');
+const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config();
 const cors = require('cors');
+// const { ObjectID, ObjectId } = require('bson');
 const port = process.env.PORT || 5000;
 
 //Middleware
@@ -16,13 +18,21 @@ async function run() {
     try{
         await client.connect();
         const database = client.db("uniqueMall");
-        const products = database.collection("products");
+        const productsCollection = database.collection("products");
 
         // GET all products
         app.get('/products', async(req, res) => {
-            const cursor = products.find({});
+            const cursor = productsCollection.find({});
             const result = await cursor.toArray();
             res.send(result);
+        })
+
+        //Get single product
+        app.get('/products/:id', async(req, res) => {
+          const id = req.params.id;
+          const query = {_id:ObjectId(id)};
+          const result = await productsCollection.findOne(query);
+          res.send(result);
         })
 
     }

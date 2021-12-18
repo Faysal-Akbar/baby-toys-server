@@ -52,6 +52,27 @@ async function run() {
           res.send(result);
         })
 
+        //get api (admin or not)
+        app.get('/users/:email', async(req, res) => {
+          const email = req.params.email;
+          const query = {email: email};
+          const result = await usersCollection.findOne(query);
+          let isAdmin = false;
+          if(result?.role === 'admin'){
+            isAdmin = true;
+          }
+          res.json({admin: isAdmin});
+        })
+
+        // update user 
+        app.put('/users', async(req, res) => {
+          const user = req.body;
+          const filter = {email: user.email};
+          const updateDoc = {$set: {role: 'admin'}}
+          const result = await usersCollection.updateOne(filter, updateDoc);
+          res.send(result);
+        })
+
         //get by email
         app.get('/orders/:email', async(req, res) => {
           const email = req.params.email;
@@ -97,6 +118,12 @@ async function run() {
           const result = await ordersCollection.updateOne(filter, updateDoc);
           res.json(result);
       })
+
+      app.get('/review', async(req, res) => {
+        const reviews = reviewsCollection.find({});
+        const result = await reviews.toArray();
+        res.send(result);
+    });
 
     }
     finally{
